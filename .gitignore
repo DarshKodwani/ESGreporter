@@ -70,10 +70,10 @@ logs/
 *.pkl
 *.pickle
 
-# ESG Documents (if you don't want to commit them)
-ESG_docs/
-documents/
-data/
+# Data directories (uncomment if you don't want to commit documents)
+# ESG_docs/
+# documents/
+# data/
 
 # Azure
 .azure/

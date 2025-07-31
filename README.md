@@ -1,6 +1,8 @@
 # ESG Reporter - Multi-Agent AI Research System
 
-A sophisticated multi-agent AI system built with LangGraph that orchestrates specialized agents to conduct comprehensive ESG (Environmental, Social, and Governance) research. The system combines web search, academic research, data analysis, and document synthesis to generate detailed ESG reports.
+A sophisticated multi-agent AI system built with LangGraph that orchestrates specialized agents to conduct comprehensive ESG (Environmental, Social, and Governance) research. The system combines web search, academic research, and document analysis to generate detailed ESG reports.
+
+**🎯 Ready-to-Use**: Includes 30+ curated ESG documents from major corporations, frameworks, and sustainability reports.
 
 ## 🌟 Features
 
@@ -33,7 +35,7 @@ A sophisticated multi-agent AI system built with LangGraph that orchestrates spe
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/ESGreporter.git
+   git clone https://github.com/DarshKodwani/ESGreporter.git
    cd ESGreporter
    ```
 
@@ -60,8 +62,10 @@ A sophisticated multi-agent AI system built with LangGraph that orchestrates spe
    # See setup instructions below
    ```
 
-6. **Index your ESG documents** (optional)
+6. **Index your ESG documents**
    ```bash
+   # The repository includes 30+ ESG PDF documents in the ESG_docs folder
+   # Run the indexing script to upload them to Azure AI Search
    python add_documents_to_index.py
    ```
 
@@ -106,6 +110,13 @@ AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT_NAME=text-embedding-3-large
 
 2. **Or use the provided schema** in `azure-index-schema.json` to create the index manually
 
+3. **Configure your Azure services:**
+   - **Azure OpenAI**: Deploy GPT-4 and text-embedding-3-large models
+   - **Azure AI Search**: Create search service and index with vector capabilities
+   - **Brave Search**: Get free API key from [Brave Search API](https://brave.com/search/api/)
+
+4. **Update environment variables** in `.env` with your actual service endpoints and keys
+
 ## 📁 Project Structure
 
 ```
@@ -117,9 +128,16 @@ ESGreporter/
 ├── add_documents_to_index.py # Document indexing script
 ├── azure-index-schema.json  # Azure AI Search index schema
 ├── requirements.txt         # Python dependencies
+├── setup.py                # Package setup configuration
+├── firstTimeSetup.sh       # Initial setup script
 ├── .env.example            # Environment variables template
-├── README.md               # This file
-└── blog_post.md           # Technical deep-dive blog post
+├── .gitignore              # Git ignore rules
+├── ESG_docs/               # ESG PDF documents (30+ files)
+│   ├── 2025-Microsoft-Environmental-Sustainability-Report.pdf
+│   ├── Apple_Environmental_Progress_Report_2025.pdf
+│   ├── 241213-hsbc-green-bonds-report-2024.pdf
+│   └── ... (27 more ESG documents)
+└── README.md               # This file
 ```
 
 ## 🎯 Usage
@@ -134,13 +152,25 @@ ESGreporter/
 
 ### Document Indexing
 
-The system can index your own ESG documents for enhanced research:
+The system includes a comprehensive collection of ESG documents for enhanced research:
 
 ```bash
-# Place PDF documents in your chosen directory
-# Update the path in add_documents_to_index.py
+# The ESG_docs folder contains 30+ PDF documents including:
+# - Microsoft Environmental Sustainability Reports (2020, 2022, 2024, 2025)
+# - Apple Environmental Progress Reports (2023, 2025)
+# - HSBC ESG Reviews and Green Bonds Reports (2021-2024)
+# - Various corporate sustainability reports and ESG frameworks
+
+# Run the indexing script to upload documents to Azure AI Search
 python add_documents_to_index.py
 ```
+
+**Document Collection Includes:**
+- Corporate ESG reports from Microsoft, Apple, HSBC, and other major companies
+- Environmental sustainability reports and climate disclosures
+- Green bonds and sustainable finance documents
+- ESG framework documents and standards
+- Social impact and governance reports
 
 ### Custom Agent Configuration
 
@@ -189,8 +219,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions and support:
 - Open an issue on GitHub
-- Check the [blog post](blog_post.md) for technical deep-dive
-- Review the code documentation
+- Review the comprehensive code documentation
+- Check the Azure AI Search and OpenAI documentation for service setup
 
 ---
 

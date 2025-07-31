@@ -180,8 +180,8 @@ def main():
     print("🚀 Indexing ESG PDF Documents in Azure AI Search")
     print("=" * 60)
     
-    # Configuration
-    ESG_DATA_DIR = Path("/Users/darshkodwani/Downloads/ESG_docs")
+    # Configuration - Using full ESG docs folder
+    ESG_DATA_DIR = Path("ESG_docs")  # Use full ESG docs folder
     INDEX_NAME = "esg-documents-index"
     
     # Check environment variables

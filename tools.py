@@ -16,7 +16,7 @@ ARXIV_API_URL = "http://export.arxiv.org/api/query"
 
 AZURE_SEARCH_ENDPOINT = os.getenv("AZURE_SEARCH_ENDPOINT")
 AZURE_SEARCH_KEY = os.getenv("AZURE_SEARCH_KEY")
-AZURE_SEARCH_INDEX = "financial-stress-test-index"
+AZURE_SEARCH_INDEX = "esg-documents-index"
 
 def brave_web_search(query: str, count: int = 10) -> List[Dict]:
     """
@@ -370,10 +370,10 @@ def format_azure_search_results(results: List[Dict]) -> str:
         str: Formatted search results
     """
     if not results:
-        return "No relevant documents found in the financial stress test index."
+        return "No relevant documents found in the ESG documents index."
     
-    formatted = "\n=== FINANCIAL DOCUMENT SEARCH RESULTS ===\n\n"
-    formatted += f"Found {len(results)} relevant documents from the indexed financial stress test collection:\n\n"
+    formatted = "\n=== ESG DOCUMENT SEARCH RESULTS ===\n\n"
+    formatted += f"Found {len(results)} relevant documents from the indexed ESG document collection:\n\n"
     
     for i, result in enumerate(results, 1):
         formatted += f"{i}. **{result.get('title', 'Unknown Document')}**\n"

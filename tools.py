@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
+from openai import AzureOpenAI
 
 load_dotenv()
 
@@ -17,6 +18,43 @@ ARXIV_API_URL = "http://export.arxiv.org/api/query"
 AZURE_SEARCH_ENDPOINT = os.getenv("AZURE_SEARCH_ENDPOINT")
 AZURE_SEARCH_KEY = os.getenv("AZURE_SEARCH_KEY")
 AZURE_SEARCH_INDEX = "esg-documents-index"
+
+# Azure OpenAI Embeddings Configuration
+AZURE_OPENAI_EMBEDDINGS_ENDPOINT = os.getenv("AZURE_OPENAI_EMBEDDINGS_ENDPOINT")
+AZURE_OPENAI_EMBEDDINGS_KEY = os.getenv("AZURE_OPENAI_EMBEDDINGS_API_KEY")
+AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT = os.getenv("AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT_NAME", "text-embedding-3-large")
+AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-15-preview")
+
+def generate_embedding(text: str) -> List[float]:
+    """
+    Generate embeddings for text using Azure OpenAI.
+    
+    Args:
+        text (str): Text to generate embeddings for
+        
+    Returns:
+        List[float]: Embedding vector
+    """
+    if not AZURE_OPENAI_EMBEDDINGS_ENDPOINT or not AZURE_OPENAI_EMBEDDINGS_KEY:
+        print("⚠️ Azure OpenAI Embeddings credentials not configured")
+        return []
+    
+    try:
+        client = AzureOpenAI(
+            azure_endpoint=AZURE_OPENAI_EMBEDDINGS_ENDPOINT,
+            api_key=AZURE_OPENAI_EMBEDDINGS_KEY,
+            api_version=AZURE_OPENAI_API_VERSION
+        )
+        
+        response = client.embeddings.create(
+            input=text,
+            model=AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT
+        )
+        
+        return response.data[0].embedding
+    except Exception as e:
+        print(f"❌ Error generating embedding: {e}")
+        return []
 
 def brave_web_search(query: str, count: int = 10) -> List[Dict]:
     """
@@ -251,37 +289,65 @@ def azure_vector_search(query: str, top_k: int = 5, use_hybrid: bool = True) -> 
             credential=AzureKeyCredential(AZURE_SEARCH_KEY)
         )
         
-        # Configure search parameters
-        search_params = {
-            "search_text": query if use_hybrid else None,
-            "vector_queries": [
-                {
-                    "vector": None,  # This would need embedding generation
-                    "k_nearest_neighbors": top_k,
-                    "fields": "content_vector"
-                }
-            ] if not use_hybrid else [],
-            "select": ["id", "title", "content", "institution", "year", "document_type", "file_path"],
-            "top": top_k,
-            "search_mode": "all" if use_hybrid else "any"
-        }
-        
-        # For now, use text-only search since we'd need to generate embeddings for vector search
-        # This can be enhanced later with proper embedding generation
         if use_hybrid:
-            results = search_client.search(
-                search_text=query,
-                select=["id", "title", "content", "institution", "year", "document_type", "file_path"],
-                top=top_k,
-                search_mode="all"
-            )
+            # Generate embedding for the query
+            print("🔍 Generating embedding for hybrid search...")
+            query_embedding = generate_embedding(query)
+            
+            if not query_embedding:
+                print("⚠️ Failed to generate embedding, falling back to text search")
+                # Fallback to text-only search
+                results = search_client.search(
+                    search_text=query,
+                    select=["id", "title", "content", "institution", "year", "document_type", "file_path"],
+                    top=top_k,
+                    search_mode="any"
+                )
+            else:
+                # True hybrid search with both text and vector
+                print("🔍 Performing hybrid search (text + vector)...")
+                from azure.search.documents.models import VectorizedQuery
+                
+                vector_query = VectorizedQuery(
+                    vector=query_embedding,
+                    k_nearest_neighbors=top_k,
+                    fields="content_vector"
+                )
+                
+                results = search_client.search(
+                    search_text=query,
+                    vector_queries=[vector_query],
+                    select=["id", "title", "content", "institution", "year", "document_type", "file_path"],
+                    top=top_k,
+                    search_mode="any"
+                )
         else:
-            # Simple text search fallback
-            results = search_client.search(
-                search_text=query,
-                select=["id", "title", "content", "institution", "year", "document_type", "file_path"],
-                top=top_k
-            )
+            # Pure vector search
+            print("🔍 Generating embedding for vector search...")
+            query_embedding = generate_embedding(query)
+            
+            if not query_embedding:
+                print("⚠️ Failed to generate embedding, falling back to text search")
+                results = search_client.search(
+                    search_text=query,
+                    select=["id", "title", "content", "institution", "year", "document_type", "file_path"],
+                    top=top_k
+                )
+            else:
+                print("🔍 Performing pure vector search...")
+                from azure.search.documents.models import VectorizedQuery
+                
+                vector_query = VectorizedQuery(
+                    vector=query_embedding,
+                    k_nearest_neighbors=top_k,
+                    fields="content_vector"
+                )
+                
+                results = search_client.search(
+                    vector_queries=[vector_query],
+                    select=["id", "title", "content", "institution", "year", "document_type", "file_path"],
+                    top=top_k
+                )
         
         formatted_results = []
         for result in results:

@@ -825,23 +825,42 @@ def main():
     
     # Sidebar with sample queries
     with st.sidebar:
-        st.markdown("## 💡 Sample Queries")
-        st.markdown("Try these examples:")
+        st.markdown("## 💡 Try These Examples")
+        st.markdown("Ask about companies in our database:")
         
         sample_queries = [
-            # Questions related to indexed ESG documents
-            "What are the leading companies in carbon reduction initiatives according to recent ESG reports?",
-            "Analyze the latest TCFD climate risk disclosures from major financial institutions", 
-            # One out-of-domain question
-            "What are the emerging ESG trends in renewable energy investments for 2025?"
+            # Simple, accessible questions about companies in our index
+            "How is Microsoft reducing their carbon emissions?",
+            "What are Apple's environmental goals and progress?",
+            "Compare the sustainability efforts of BP and Unilever",
+            "What green initiatives is HSBC funding?",
+            "Show me PepsiCo's progress on sustainability targets"
         ]
         
         for i, sample in enumerate(sample_queries, 1):
-            # Truncate long queries for button display
-            display_text = sample if len(sample) <= 60 else sample[:57] + "..."
+            # Use shorter button labels but full query text
+            button_labels = [
+                "🍃 Microsoft Carbon Goals",
+                "🌱 Apple Environmental Progress", 
+                "⚖️ Compare BP vs Unilever",
+                "💚 HSBC Green Funding",
+                "🎯 PepsiCo Sustainability"
+            ]
             
-            if st.button(f"📋 {display_text}", key=f"sample_{i}", use_container_width=True):
+            if st.button(button_labels[i-1], key=f"sample_{i}", use_container_width=True):
                 st.session_state.query = sample
+        
+        st.markdown("---")
+        st.markdown("## 📊 Available Companies")
+        st.markdown("Our database includes ESG reports from:")
+        st.markdown("""
+        • **Microsoft** - Environmental sustainability reports
+        • **Apple** - Environmental progress reports  
+        • **HSBC** - ESG reviews and green bonds
+        • **BP** - Sustainability and ESG datasheets
+        • **Unilever** - Annual reports and climate action
+        • **PepsiCo** - ESG summaries and green bonds
+        """)
         
         st.markdown("---")
         st.markdown("## 🎛️ Mission Control")
